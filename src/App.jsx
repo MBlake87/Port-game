@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PORT_QUESTIONS } from "./portData";
+import "./App.css";
 
 function getRandomQuestion() {
   //gets a random port from the list and returns
@@ -46,60 +47,78 @@ function App() {
   }
 
   function handleOptionClick(port) {
+    //if player has selected answer, stop additional clicks
     if (selected !== null) return;
-
+    //set selected port
     setSelected(port);
+    //check if correct
     const correct = port === currentQuestion.port;
     setIsCorrect(correct);
+    //handle score
     if (correct) {
       setScore((prev) => prev + 1);
     }
   }
 
+  //handle next question
   function handleNext() {
     setQuestionNumber((prev) => prev + 1);
     setupNewQuestion();
   }
-
+  //check question has loaded
   if (!currentQuestion) return <div>Loading…</div>;
 
   return (
-    <div>
-      <h2>Question #{questionNumber}</h2>
-      <p>Score: {score}</p>
+    <>
+      <h1>Port Guessing Game!</h1>
+      <div className="game-card">
+        <div className="card-content">
+          <div className="score">
+            <h2>Question #{questionNumber}</h2>
+            <p>Score: {score}</p>
+          </div>
 
-      <h3>Which port matches this description?</h3>
-      <p>{currentQuestion.description}</p>
+          <h3>Which port matches this description?</h3>
+          <p>{currentQuestion.description}</p>
 
-      <div>
-        {options.map((port) => (
-          <button
-            key={port}
-            onClick={() => handleOptionClick(port)}
-            disabled={selected !== null}
-          >
-            Port {port}
-          </button>
-        ))}
-      </div>
+          <div className="options-grid">
+            {options.map((port) => {
+              const isSelected = selected === port;
+              const isCorrectPort = port === currentQuestion.port;
 
-      {selected !== null && (
-        <div>
-          {isCorrect ? (
-            <p>Correct! ✔</p>
-          ) : (
-            <p>
-              Incorrect. The correct port is{" "}
-              <strong>{currentQuestion.port}</strong>.
-            </p>
-          )}
+              let className = "option-btn";
+
+              if (selected !== null) {
+                if (isCorrectPort) className += " correct";
+                else if (isSelected) className += " wrong";
+              }
+
+              return (
+                <button
+                  key={port}
+                  onClick={() => handleOptionClick(port)}
+                  disabled={selected !== null}
+                  className={className}
+                >
+                  Port {port}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
+        {selected !== null && (
+          <div className="feedback">
+            {isCorrect
+              ? "Correct! ✔"
+              : `Incorrect: Correct port: ${currentQuestion.port}`}
+          </div>
+        )}
 
-      <button onClick={handleNext}>
-        {selected === null ? "Skip" : "Next"}
-      </button>
-    </div>
+        <button className="next-btn" onClick={handleNext}>
+          {selected === null ? "Skip" : "Next"}
+        </button>
+      </div>
+    </>
   );
 }
 
